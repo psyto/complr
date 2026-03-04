@@ -1,8 +1,8 @@
 # Complr
 
-AI-Native Compliance Intelligence for Asia's Crypto Markets.
+Compliance infrastructure for Asia's regulated crypto economy.
 
-Complr is a multi-jurisdiction compliance engine covering **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It uses LLMs to interpret regulatory text, check transactions against jurisdiction-specific rules, generate SAR/STR reports, and extract structured obligations from regulatory documents.
+Complr is an AI-powered compliance platform covering **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It provides a core compliance engine, an SDK for exchanges and VASPs to embed compliance checks into their workflows, and a regulated yield platform demonstrating compliance-first DeFi.
 
 ## Product Phases
 
