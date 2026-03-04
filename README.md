@@ -2,14 +2,167 @@
 
 AI-Native Compliance Intelligence for Asia's Crypto Markets.
 
-Complr is a multi-jurisdiction compliance engine that covers **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It uses LLMs to interpret regulatory text, check transactions against jurisdiction-specific rules, generate SAR/STR reports, and extract structured obligations from regulatory documents.
+Complr is a multi-jurisdiction compliance engine covering **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It uses LLMs to interpret regulatory text, check transactions against jurisdiction-specific rules, generate SAR/STR reports, and extract structured obligations from regulatory documents.
 
-## Features
+## Product Phases
+
+| Phase | Name | Status | Description |
+|-------|------|--------|-------------|
+| **0** | AI Compliance Agent | Complete | Core compliance engine with 4 features |
+| **1** | Compliance Middleware SDK | MVP | `@complr/sdk` — npm-installable SDK for exchanges/VASPs |
+| **2** | Regulated Yield Platform | Demo | Compliance-embedded yield vaults for investor pitches |
+
+---
+
+## Phase 0: Core Compliance Engine
+
+### Features
 
 - **Regulatory Queries** -- Ask natural language questions about crypto regulations and get jurisdiction-specific answers grounded in actual regulatory text
 - **Transaction Compliance Checks** -- Submit a single transaction and get compliance results across all 3 jurisdictions simultaneously, including Travel Rule applicability, KYC requirements, and action items
 - **SAR/STR Generation** -- Auto-draft Suspicious Transaction Reports in regulator-specific formats (FSA STR, MAS STR, SFC STR) in seconds
 - **Obligation Extraction** -- Feed in regulatory documents and get structured, actionable obligations with thresholds, penalties, and suggested controls
+
+### Web UI
+
+Open `http://localhost:3000` after starting the server. 4 interactive tabs for all core features.
+
+---
+
+## Phase 1: Compliance Middleware SDK
+
+The SDK wraps the compliance engine into an authenticated API that exchanges and VASPs can integrate via `npm install @complr/sdk`.
+
+### SDK Features
+
+- **Authenticated API** -- Bearer token auth with per-key rate limiting
+- **Batch Compliance Checks** -- Check up to 50 transactions in parallel
+- **Wallet Risk Screening** -- LLM-powered wallet address risk assessment
+- **Webhook Delivery** -- HMAC-signed webhook notifications with exponential backoff retry
+- **Usage Tracking** -- Per-key request counts and usage statistics
+- **TypeScript-first** -- Full type definitions, zero dependencies
+
+### SDK Quick Start
+
+```typescript
+import { ComplrClient } from "@complr/sdk";
+
+const complr = new ComplrClient({
+  apiKey: "complr_...",
+  baseUrl: "http://localhost:3000",
+});
+
+// Single transaction check
+const result = await complr.checkTransaction({
+  transactionId: "tx_001",
+  timestamp: new Date().toISOString(),
+  senderWallet: "0xabc...",
+  recipientWallet: "0xdef...",
+  amount: "10000",
+  currency: "USDC",
+  chain: "ethereum",
+});
+
+// Batch check
+const batch = await complr.checkBatch(transactions);
+
+// Wallet screening
+const screen = await complr.screenWallet("0xabc...", "ethereum", "MAS");
+
+// Webhook management
+await complr.registerWebhook("https://your-app.com/webhooks", ["check.blocked", "screen.high_risk"], "your-secret");
+```
+
+### API Key Management
+
+```bash
+# Generate an API key
+curl -X POST localhost:3000/admin/api-keys \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-exchange"}'
+
+# List all keys
+curl localhost:3000/admin/api-keys
+
+# Revoke a key
+curl -X DELETE localhost:3000/admin/api-keys/ak_xxx
+```
+
+### V1 API Endpoints
+
+All `/api/v1/*` routes require a Bearer token via the `Authorization` header.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/query` | Regulatory knowledge base query |
+| POST | `/api/v1/check` | Single transaction compliance check |
+| POST | `/api/v1/check/batch` | Batch check (up to 50 transactions) |
+| POST | `/api/v1/screen/wallet` | LLM-based wallet risk assessment |
+| POST | `/api/v1/report` | SAR/STR report generation |
+| POST | `/api/v1/analyze` | Obligation extraction |
+| POST | `/api/v1/webhooks` | Register a webhook |
+| GET | `/api/v1/webhooks` | List webhooks |
+| DELETE | `/api/v1/webhooks/:id` | Remove a webhook |
+| GET | `/api/v1/usage` | Usage stats for current API key |
+
+### Admin Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/admin/api-keys` | Generate API key |
+| GET | `/admin/api-keys` | List all keys |
+| DELETE | `/admin/api-keys/:id` | Revoke key |
+
+---
+
+## Phase 2: Regulated Yield Platform (Demo)
+
+A demo yield platform showing how compliance-embedded yield vaults would work. For investor pitches only -- no real money.
+
+### Vault Dashboard
+
+Open `http://localhost:3000/vault-demo` after starting the server. 5 interactive tabs:
+
+1. **Strategies** -- 3 vault cards with APY, composition breakdown, risk rating
+2. **Portfolio** -- Total value, yield earned, allocation pie chart
+3. **Performance** -- 90-day NAV line chart (SVG, zero dependencies)
+4. **Deposit / Withdraw** -- Eligibility check + transaction forms
+5. **Investor Onboarding** -- Registration + compliance screening flow
+
+### Vault Strategies
+
+| Vault | Composition | Target APY | Risk | Min Deposit |
+|-------|-------------|-----------|------|-------------|
+| **Conservative** | 70% BUIDL + 20% USYC + 10% USDC | 3.8% | Low | $1,000 |
+| **Balanced** | 40% BUIDL + 30% USDY + 20% USYC + 10% USDC | 4.3% | Medium | $5,000 |
+| **Growth** | 30% BUIDL + 30% USDY + 25% sDAI + 15% USDC | 4.8% | Medium | $10,000 (accredited only) |
+
+### Vault API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/vault/strategies` | List vault configs with current yields |
+| GET | `/vault/performance/:vaultId` | Historical NAV data (query: `?days=90`) |
+| POST | `/vault/deposit` | Deposit (checks compliance first) |
+| POST | `/vault/withdraw` | Withdraw shares |
+| GET | `/vault/portfolio/:investorId` | Investor positions and total value |
+| POST | `/vault/investors/register` | Register new investor |
+| POST | `/vault/investors/:id/screen` | Run KYC/sanctions screening |
+| GET | `/vault/investors/:id` | Get investor profile |
+| GET | `/vault/investors` | List all investors |
+| GET | `/vault/reports/:investorId` | Generate monthly report |
+
+### Demo Investors
+
+3 pre-seeded investors across jurisdictions:
+
+| Name | Jurisdiction | Accredited |
+|------|-------------|------------|
+| Tanaka Hiroshi | FSA (Japan) | Yes |
+| Lim Wei Ting | MAS (Singapore) | No |
+| Chan Ka Ming | SFC (Hong Kong) | Yes |
+
+---
 
 ## Quickstart
 
@@ -17,45 +170,66 @@ Complr is a multi-jurisdiction compliance engine that covers **MAS** (Singapore)
 # Install dependencies
 npm install
 
-# Run the demo (all 4 features)
-ANTHROPIC_API_KEY=sk-ant-... npx tsx src/demo.ts
-
-# Start the REST API server
+# Start the server (serves all 3 phases)
 ANTHROPIC_API_KEY=sk-ant-... npm run start:server
+
+# Run the Phase 0 demo
+ANTHROPIC_API_KEY=sk-ant-... npx tsx src/demo.ts
 
 # Start the interactive CLI
 ANTHROPIC_API_KEY=sk-ant-... npm start
 ```
 
+After starting the server:
+
+- **Phase 0 Web UI**: http://localhost:3000
+- **Phase 2 Vault Dashboard**: http://localhost:3000/vault-demo
+- **Health Check**: http://localhost:3000/health
+
 ## Architecture
 
 ```
 src/
-  index.ts                  # Complr class -- main entry point
-  types.ts                  # Shared types and interfaces
-  utils.ts                  # JSON extraction from LLM responses
-  demo.ts                   # Demo script (4 features)
-  cli.ts                    # Interactive REPL
-  api/server.ts             # Express REST API
-  data/seed-regulations.ts  # Seed regulatory data (8 documents)
-  regulatory/
-    analyzer.ts             # LLM-powered regulatory analysis
-    knowledge-base.ts       # In-memory document store with search
+  index.ts                          # Complr class -- main entry point
+  types.ts                          # Shared types and interfaces
+  utils.ts                          # JSON extraction from LLM responses
+  demo.ts                           # Demo script (4 features)
+  cli.ts                            # Interactive REPL
+  api/
+    server.ts                       # Express REST API (legacy + v1 + admin + vault)
+    vault-routes.ts                 # Vault demo endpoints
+  auth/
+    api-keys.ts                     # API key generation, validation, usage tracking
+    middleware.ts                   # Bearer token auth + rate limiting middleware
+  data/
+    seed-regulations.ts             # 8 seed regulatory documents
+    seed-investors.ts               # 3 demo investors
   policy/
-    engine.ts               # Multi-jurisdiction compliance engine
+    engine.ts                       # Multi-jurisdiction compliance engine
+    wallet-screener.ts              # LLM-powered wallet risk screening
+  regulatory/
+    analyzer.ts                     # LLM-powered regulatory analysis
+    knowledge-base.ts               # In-memory document store with search
   reports/
-    generator.ts            # SAR/STR report generation
+    generator.ts                    # SAR/STR report generation
+  vault/
+    simulator.ts                    # Vault strategies, NAV, deposit/withdraw
+    investor-compliance.ts          # Investor registration and KYC screening
+    report-generator.ts             # Monthly investor reports and tax summaries
+  webhooks/
+    manager.ts                      # Webhook registration and HMAC-signed delivery
+
+sdk/                                # Standalone SDK package (@complr/sdk)
+  src/
+    client.ts                       # ComplrClient class with retry/backoff
+    types.ts                        # SDK-facing type definitions
+    webhook-handler.ts              # Signature verification + Express middleware
+    index.ts                        # SDK entry point
+
+public/
+  index.html                        # Phase 0 web UI (4 tabs)
+  vault.html                        # Phase 2 vault dashboard (5 tabs)
 ```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Health check |
-| POST | `/query` | Regulatory knowledge base query |
-| POST | `/check` | Transaction compliance check |
-| POST | `/report` | SAR/STR report generation |
-| POST | `/analyze` | Obligation extraction from documents |
 
 ## Jurisdictions
 
@@ -72,6 +246,14 @@ The knowledge base ships with 8 regulatory documents covering:
 - MAS Payment Services Act (DPT licensing, Travel Rule, tokenisation guide)
 - SFC ASPIRe roadmap, Travel Rule under AMLO, Stablecoins Ordinance
 - FSA Travel Rule (JVCEA), crypto tax reform proposal
+
+## Design Decisions
+
+- **Zero new npm dependencies** -- uses native `fetch()`, `node:crypto`, inline SVG charts
+- **In-memory everything** -- all state (API keys, vaults, investors) stored in `Map<string, T>`. Server restart resets. Easy to migrate to a database later
+- **SDK is standalone** -- `sdk/` directory with its own `package.json`, duplicates types intentionally for clean package separation
+- **Legacy routes preserved** -- existing web UI at `/` continues to work without auth
+- **Single Express server** -- SDK API (`/api/v1/*`), vault demo (`/vault/*`), and web UI all share one server
 
 ## Development
 
