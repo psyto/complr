@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complr - AI-Native Compliance Intelligence</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #111827;
+      --surface-2: #1a2332;
+      --border: #1e2d3d;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --radius: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header span {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-left: auto;
+    }
+
+    nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    nav button {
+      flex: 1;
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    nav button:hover { color: var(--text); background: var(--surface-2); }
+    nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .panel { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
+    .panel.active { display: block; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    button.btn {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn:hover { background: var(--primary-hover); }
+    button.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.7;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .result h3 { font-size: 14px; margin-bottom: 8px; color: var(--primary); }
+
+    .jurisdiction-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .jurisdiction-card h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-msg { color: var(--text-muted); font-size: 13px; margin-top: 16px; }
+
+    ul { list-style: none; padding: 0; }
+    ul li { padding: 4px 0; font-size: 13px; }
+    ul li::before { content: "- "; color: var(--text-muted); }
+
+    .issue-item { color: var(--yellow); }
+    .obligation-item { color: var(--text); }
+
+    .obl-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+
+    .obl-card .obl-type {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .obl-card .obl-summary { font-size: 13px; margin-bottom: 6px; }
+    .obl-card .obl-detail { font-size: 12px; color: var(--text-muted); }
+
+    .report-section { margin-bottom: 16px; }
+    .report-section h4 { font-size: 13px; color: var(--primary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .report-section p { font-size: 13px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Complr</h1>
+  <span>AI-Native Compliance Intelligence for Asia</span>
+  <div class="status-dot" title="API Connected"></div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('query')">Regulatory Query</button>
+  <button onclick="showTab('check')">Transaction Check</button>
+  <button onclick="showTab('report')">SAR/STR Report</button>
+  <button onclick="showTab('analyze')">Obligation Extraction</button>
+</nav>
+
+<!-- Tab 1: Regulatory Query -->
+<div id="tab-query" class="panel active">
+  <div class="form-group">
+    <label>Question</label>
+    <textarea id="q-question" placeholder="e.g. What are the Travel Rule requirements for crypto transfers?">What are the Travel Rule thresholds and key requirements for crypto transfers?</textarea>
+  </div>
+  <div class="form-group">
+    <label>Jurisdiction</label>
+    <select id="q-jurisdiction">
+      <option value="MAS">MAS (Singapore)</option>
+      <option value="SFC">SFC (Hong Kong)</option>
+      <option value="FSA">FSA (Japan)</option>
+    </select>
+  </div>
+  <button class="btn" onclick="runQuery()">Ask</button>
+  <div id="q-result"></div>
+</div>
+
+<!-- Tab 2: Transaction Check -->
+<div id="tab-check" class="panel">
+  <div class="row">
+    <div class="form-group">
+      <label>Sender Wallet</label>
+      <input id="c-sender" value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU">
+    </div>
+    <div class="form-group">
+      <label>Recipient Wallet</label>
+      <input id="c-recipient" value="3Kz9bMiVYFhBEbJSiRvNaDEM8TM2qMYyHQfJwcQpzLr2">
+    </div>
+  </div>
+  <div class="row-3">
+    <div class="form-group">
+      <label>Amount</label>
+      <input id="c-amount" type="number" value="25000">
+    </div>
+    <div class="form-group">
+      <label>Currency</label>
+      <input id="c-currency" value="USDC">
+    </div>
+    <div class="form-group">
+      <label>Chain</label>
+      <input id="c-chain" value="solana">
+    </div>
+  </div>
+  <div class="row">
+    <div class="form-group">
+      <label>Sender KYC Level</label>
+      <select id="c-sender-kyc">
+        <option value="enhanced">Enhanced</option>
+        <option value="standard" selected>Standard</option>
+        <option value="basic">Basic</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Recipient KYC Level</label>
+      <select id="c-recipient-kyc">
+        <option value="enhanced">Enhanced</option>
+        <option value="standard">Standard</option>
+        <option value="basic" selected>Basic</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn" onclick="runCheck()">Check Compliance</button>
+  <div id="c-result"></div>
+</div>
+
+<!-- Tab 3: SAR/STR Report -->
+<div id="tab-report" class="panel">
+  <div class="row">
+    <div class="form-group">
+      <label>Amount</label>
+      <input id="r-amount" type="number" value="98500">
+    </div>
+    <div class="form-group">
+      <label>Currency</label>
+      <input id="r-currency" value="USDC">
+    </div>
+  </div>
+  <div class="row">
+    <div class="form-group">
+      <label>Sender Wallet</label>
+      <input id="r-sender" value="9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT">
+    </div>
+    <div class="form-group">
+      <label>Recipient Wallet</label>
+      <input id="r-recipient" value="HN7cABqLq46Es1jh92dQQisAi5YqBXMWUZbzPLGUoJqo">
+    </div>
+  </div>
+  <div class="row-3">
+    <div class="form-group">
+      <label>Sender KYC</label>
+      <select id="r-sender-kyc">
+        <option value="basic" selected>Basic</option>
+        <option value="standard">Standard</option>
+        <option value="enhanced">Enhanced</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Recipient KYC</label>
+      <select id="r-recipient-kyc">
+        <option value="unknown" selected>Unknown</option>
+        <option value="basic">Basic</option>
+        <option value="standard">Standard</option>
+        <option value="enhanced">Enhanced</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Jurisdiction</label>
+      <select id="r-jurisdiction">
+        <option value="FSA">FSA (Japan)</option>
+        <option value="MAS">MAS (Singapore)</option>
+        <option value="SFC">SFC (Hong Kong)</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Risk Indicators (one per line)</label>
+    <textarea id="r-indicators" rows="5">Transaction just below 100,000 USDC threshold (possible structuring)
+Recipient wallet has no KYC verification
+Transaction executed at 3:15 AM local time (unusual hours)
+Sender account opened 48 hours ago with immediate large transfer
+Recipient wallet previously associated with mixer service</textarea>
+  </div>
+  <button class="btn" onclick="runReport()">Generate Report</button>
+  <div id="r-result"></div>
+</div>
+
+<!-- Tab 4: Obligation Extraction -->
+<div id="tab-analyze" class="panel">
+  <div class="form-group">
+    <label>Select Regulatory Document</label>
+    <select id="a-doc">
+      <option value="sfc_stablecoin_2025">HK Stablecoins Ordinance (Aug 2025)</option>
+      <option value="mas_psa_dpt_2025">MAS Payment Services Act - DPT (2025)</option>
+      <option value="sfc_aspire_2025">SFC ASPIRe Roadmap (Feb 2025)</option>
+      <option value="mas_tokenisation_guide_2025">MAS Tokenisation Guide (Nov 2025)</option>
+      <option value="fsa_crypto_tax_2026">FSA Japan Crypto Tax Reform (2026)</option>
+    </select>
+  </div>
+  <button class="btn" onclick="runAnalyze()">Extract Obligations</button>
+  <div id="a-result"></div>
+</div>
+
+<script>
+  // Seed document metadata for the analyze endpoint
+  const SEED_DOCS = {
+    sfc_stablecoin_2025: { id: "sfc_stablecoin_2025", jurisdiction: "SFC", title: "Hong Kong Stablecoins Ordinance (Effective Aug 2025)", source: "https://www.hkma.gov.hk", publishedAt: "2025-08-01", language: "en", category: "stablecoin" },
+    mas_psa_dpt_2025: { id: "mas_psa_dpt_2025", jurisdiction: "MAS", title: "Payment Services Act - Digital Payment Token Services (2025 Amendments)", source: "https://www.mas.gov.sg/regulation/payments", publishedAt: "2025-04-01", language: "en", category: "licensing" },
+    sfc_aspire_2025: { id: "sfc_aspire_2025", jurisdiction: "SFC", title: "ASPIRe Regulatory Roadmap for Virtual Assets (Feb 2025)", source: "https://www.sfc.hk", publishedAt: "2025-02-19", language: "en", category: "licensing" },
+    mas_tokenisation_guide_2025: { id: "mas_tokenisation_guide_2025", jurisdiction: "MAS", title: "Guide on the Tokenisation of Capital Markets Products (Revised Nov 2025)", source: "https://www.mas.gov.sg/regulation/guidelines/guide-on-tokenisation-of-cmps", publishedAt: "2025-11-14", language: "en", category: "token_offering" },
+    fsa_crypto_tax_2026: { id: "fsa_crypto_tax_2026", jurisdiction: "FSA", title: "Japan 2026 Crypto Tax Reform Proposal", source: "https://www.fsa.go.jp", publishedAt: "2025-12-15", language: "en", category: "reporting" },
+  };
+
+  function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function showLoading(el, msg) {
+    el.innerHTML = '<div class="loading-msg"><span class="spinner"></span>' + msg + '</div>';
+  }
+
+  function statusBadge(status) {
+    const cls = status === 'compliant' ? 'badge-green' : status === 'blocked' ? 'badge-red' : 'badge-yellow';
+    return '<span class="badge ' + cls + '">' + status + '</span>';
+  }
+
+  async function post(url, body) {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  async function runQuery() {
+    const el = document.getElementById('q-result');
+    const question = document.getElementById('q-question').value;
+    const jurisdiction = document.getElementById('q-jurisdiction').value;
+    showLoading(el, 'Querying ' + jurisdiction + ' regulations...');
+    try {
+      const data = await post('/query', { question, jurisdiction });
+      el.innerHTML = '<div class="result">' + escapeHtml(data.answer) + '</div>';
+    } catch (e) { el.innerHTML = '<div class="result" style="color:var(--red)">Error: ' + escapeHtml(e.message) + '</div>'; }
+  }
+
+  async function runCheck() {
+    const el = document.getElementById('c-result');
+    const tx = {
+      transactionId: 'tx_web_' + Date.now(),
+      timestamp: new Date().toISOString(),
+      senderWallet: document.getElementById('c-sender').value,
+      recipientWallet: document.getElementById('c-recipient').value,
+      amount: document.getElementById('c-amount').value,
+      currency: document.getElementById('c-currency').value,
+      chain: document.getElementById('c-chain').value,
+      senderKycLevel: document.getElementById('c-sender-kyc').value,
+      recipientKycLevel: document.getElementById('c-recipient-kyc').value,
+    };
+    showLoading(el, 'Checking compliance across MAS, SFC, FSA...');
+    try {
+      const data = await post('/check', { transaction: tx });
+      let html = '<div class="result">';
+      html += '<h3>Overall: ' + statusBadge(data.overallStatus) + '</h3>';
+      for (const jr of data.jurisdictions) {
+        html += '<div class="jurisdiction-card">';
+        html += '<h4>' + jr.jurisdiction + ' ' + statusBadge(jr.status) + '</h4>';
+        html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">';
+        html += 'Travel Rule: ' + (jr.travelRuleRequired ? '<strong style="color:var(--yellow)">Required</strong>' : 'No');
+        html += ' &nbsp; Reporting: ' + (jr.reportingRequired ? '<strong style="color:var(--yellow)">Required</strong>' : 'No');
+        html += '</div>';
+        if (jr.obligations.length) {
+          html += '<ul>' + jr.obligations.map(o => '<li class="obligation-item">' + escapeHtml(o) + '</li>').join('') + '</ul>';
+        }
+        if (jr.issues.length) {
+          html += '<ul style="margin-top:8px">' + jr.issues.map(i => '<li class="issue-item">' + escapeHtml(i) + '</li>').join('') + '</ul>';
+        }
+        html += '</div>';
+      }
+      if (data.actionItems.length) {
+        html += '<h3 style="margin-top:12px">Action Items</h3>';
+        html += '<ul>' + data.actionItems.map(a => '<li class="issue-item">' + escapeHtml(a) + '</li>').join('') + '</ul>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    } catch (e) { el.innerHTML = '<div class="result" style="color:var(--red)">Error: ' + escapeHtml(e.message) + '</div>'; }
+  }
+
+  async function runReport() {
+    const el = document.getElementById('r-result');
+    const tx = {
+      transactionId: 'tx_sar_' + Date.now(),
+      timestamp: new Date().toISOString(),
+      senderWallet: document.getElementById('r-sender').value,
+      recipientWallet: document.getElementById('r-recipient').value,
+      amount: document.getElementById('r-amount').value,
+      currency: document.getElementById('r-currency').value,
+      chain: 'solana',
+      senderKycLevel: document.getElementById('r-sender-kyc').value,
+      recipientKycLevel: document.getElementById('r-recipient-kyc').value,
+    };
+    const indicators = document.getElementById('r-indicators').value.split('\n').filter(l => l.trim());
+    const jurisdiction = document.getElementById('r-jurisdiction').value;
+    showLoading(el, 'Generating ' + jurisdiction + ' STR report...');
+    try {
+      const data = await post('/report', { transaction: tx, riskIndicators: indicators, jurisdiction });
+      let html = '<div class="result">';
+      html += '<div style="display:flex;gap:16px;margin-bottom:16px;font-size:12px;color:var(--text-muted)">';
+      html += '<span>Report ID: ' + data.id + '</span>';
+      html += '<span>Format: ' + data.format + '</span>';
+      html += '<span>Status: ' + data.status + '</span>';
+      html += '</div>';
+      html += '<div class="report-section"><h4>Suspicion Narrative</h4><p>' + escapeHtml(data.suspicionNarrative) + '</p></div>';
+      html += '<div class="report-section"><h4>Risk Indicators</h4><ul>' + data.riskIndicators.map(r => '<li>' + escapeHtml(r) + '</li>').join('') + '</ul></div>';
+      html += '<div class="report-section"><h4>Recommended Action</h4><p>' + escapeHtml(data.recommendedAction) + '</p></div>';
+      html += '</div>';
+      el.innerHTML = html;
+    } catch (e) { el.innerHTML = '<div class="result" style="color:var(--red)">Error: ' + escapeHtml(e.message) + '</div>'; }
+  }
+
+  async function runAnalyze() {
+    const el = document.getElementById('a-result');
+    const docId = document.getElementById('a-doc').value;
+    const doc = SEED_DOCS[docId];
+    showLoading(el, 'Extracting obligations from ' + doc.title + '...');
+    try {
+      const data = await post('/analyze', { document: doc });
+      let html = '<div class="result">';
+      html += '<h3>Found ' + data.obligations.length + ' obligations</h3>';
+      for (const obl of data.obligations) {
+        html += '<div class="obl-card">';
+        html += '<div class="obl-type">' + escapeHtml(obl.obligationType) + '</div>';
+        html += '<div class="obl-summary">' + escapeHtml(obl.summary) + '</div>';
+        let details = [];
+        if (obl.threshold) details.push('Threshold: ' + obl.threshold);
+        if (obl.penalties) details.push('Penalties: ' + obl.penalties);
+        if (obl.applicableTo?.length) details.push('Applies to: ' + obl.applicableTo.join(', '));
+        if (obl.controlMapping?.length) details.push('Controls: ' + obl.controlMapping.join('; '));
+        if (details.length) html += '<div class="obl-detail">' + escapeHtml(details.join(' | ')) + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    } catch (e) { el.innerHTML = '<div class="result" style="color:var(--red)">Error: ' + escapeHtml(e.message) + '</div>'; }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>

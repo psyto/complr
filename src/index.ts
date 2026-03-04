@@ -55,6 +55,11 @@ export class Complr {
     return this.knowledgeBase.size;
   }
 
+  /** Look up a document by ID */
+  getDocument(id: string): RegulatoryDocument | undefined {
+    return this.knowledgeBase.getById(id);
+  }
+
   /** Query the regulatory knowledge base with natural language */
   async query(question: string, jurisdiction: Jurisdiction): Promise<string> {
     const docs = this.knowledgeBase.byJurisdiction(jurisdiction);
