@@ -68,7 +68,7 @@ rl.on("line", async (line) => {
         if (!txJson) {
           console.log("Usage: check <transaction JSON>");
           console.log(
-            'Example: check {"transactionId":"tx1","timestamp":"2026-03-01","senderWallet":"ABC","recipientWallet":"DEF","amount":"10000","currency":"USDC","chain":"solana"}'
+            'Example: check {"transactionId":"tx1","timestamp":"2026-03-01","senderWallet":"0xABC...","recipientWallet":"0xDEF...","amount":"10000","currency":"USDC","chain":"ethereum"}'
           );
           break;
         }

@@ -12,6 +12,7 @@ import type { ScreeningRegistry } from "../policy/screening-provider.js";
 import type { OfacScreener } from "../policy/ofac-screener.js";
 import type { AuditLogger } from "../audit/logger.js";
 import type { Jurisdiction, TransactionDetails, AuditAction } from "../types.js";
+import { detectAddressFormat } from "../types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -276,7 +277,7 @@ export function createApp(deps: AppDependencies): express.Express {
       res.status(400).json({ error: "address is required" });
       return;
     }
-    const resolvedChain = chain || "ethereum";
+    const resolvedChain = chain || detectAddressFormat(address) || "unknown";
     const hits = screeningRegistry.screenAll(address, resolvedChain);
     res.json({
       address,
@@ -387,11 +388,11 @@ export function createApp(deps: AppDependencies): express.Express {
     }
     const { address, chain, jurisdiction } = req.body as {
       address: string;
-      chain: string;
+      chain?: string;
       jurisdiction?: Jurisdiction;
     };
-    if (!address || !chain) {
-      res.status(400).json({ error: "address and chain are required" });
+    if (!address) {
+      res.status(400).json({ error: "address is required" });
       return;
     }
     keyManager.trackUsage(req.apiKey!.id, "screening");

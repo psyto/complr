@@ -70,10 +70,14 @@ export class ComplrClient {
     });
   }
 
-  /** Screen a wallet address for risk factors */
+  /**
+   * Screen a wallet address for risk factors.
+   * Chain is auto-detected from the address format if omitted.
+   * Supports Ethereum/EVM, Solana, Bitcoin, and other address formats.
+   */
   async screenWallet(
     address: string,
-    chain: string,
+    chain?: string,
     jurisdiction?: Jurisdiction
   ): Promise<WalletScreenResult> {
     return this.post<WalletScreenResult>("/api/v1/screen/wallet", {

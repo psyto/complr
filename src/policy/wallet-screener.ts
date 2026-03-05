@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Jurisdiction, WalletScreenResult } from "../types.js";
+import { detectAddressFormat } from "../types.js";
 import type { ScreeningRegistry } from "./screening-provider.js";
 import { extractJson } from "../utils.js";
 
@@ -20,21 +21,24 @@ export class WalletScreener {
     this.registry = registry;
   }
 
-  /** Screen a wallet address for risk factors */
+  /** Screen a wallet address for risk factors. Chain is auto-detected if omitted. */
   async screen(
     address: string,
-    chain: string,
+    chain?: string,
     jurisdiction?: Jurisdiction
   ): Promise<WalletScreenResult> {
+    // Auto-detect chain from address format if not provided
+    const resolvedChain = chain || detectAddressFormat(address) || "unknown";
+
     // Step 1: Check all registered screening providers
-    const providerHits = this.registry?.screenAll(address, chain) ?? [];
+    const providerHits = this.registry?.screenAll(address, resolvedChain) ?? [];
 
     // Step 2: If exact sanctions hit, return immediately
     const exactHit = providerHits.find((h) => h.matchType === "exact" && h.confidence >= 0.95);
     if (exactHit) {
       return {
         address,
-        chain,
+        chain: resolvedChain,
         riskScore: 100,
         riskLevel: "critical",
         flags: [
@@ -88,7 +92,7 @@ Return ONLY the JSON object.`,
           role: "user",
           content: `Screen this wallet address:
 - Address: ${address}
-- Chain: ${chain}
+- Chain: ${resolvedChain}
 ${jurisdiction ? `- Jurisdiction: ${jurisdiction}` : ""}
 ${providerContext}
 Perform a thorough risk assessment based on the address characteristics and chain.`,
@@ -109,7 +113,7 @@ Perform a thorough risk assessment based on the address characteristics and chai
       };
       return {
         address,
-        chain,
+        chain: resolvedChain,
         riskScore: parsed.riskScore ?? 50,
         riskLevel: (parsed.riskLevel as WalletScreenResult["riskLevel"]) ?? "medium",
         flags: parsed.flags ?? [],
@@ -120,7 +124,7 @@ Perform a thorough risk assessment based on the address characteristics and chai
     } catch {
       return {
         address,
-        chain,
+        chain: resolvedChain,
         riskScore: 50,
         riskLevel: "medium",
         flags: ["Screening analysis could not be completed"],

@@ -113,10 +113,11 @@ export class Complr {
   }
 }
 
-// Re-export types
+// Re-export types and utilities
 export type {
   ComplrConfig,
   Jurisdiction,
+  AddressFormat,
   RegulatoryDocument,
   RegulatoryObligation,
   TransactionDetails,
@@ -124,6 +125,8 @@ export type {
   SarReport,
   RegDelta,
 } from "./types.js";
+
+export { detectAddressFormat } from "./types.js";
 
 export { RegulatoryKnowledgeBase } from "./regulatory/index.js";
 export { RegulatoryAnalyzer } from "./regulatory/index.js";

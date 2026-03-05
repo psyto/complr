@@ -2,9 +2,11 @@
 
 [![CI](https://github.com/complr/complr/actions/workflows/ci.yml/badge.svg)](https://github.com/complr/complr/actions/workflows/ci.yml)
 
-Compliance infrastructure for Asia's regulated crypto economy.
+AI-powered compliance infrastructure for the digital asset industry.
 
-Complr is an AI-powered compliance platform covering **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It provides a core compliance engine, an SDK for exchanges and VASPs to embed compliance checks into their workflows, and a regulated yield platform demonstrating compliance-first DeFi.
+Complr is a **chain-agnostic** compliance platform covering **MAS** (Singapore), **SFC** (Hong Kong), and **FSA** (Japan). It provides a core compliance engine, an SDK for exchanges and VASPs to embed compliance checks into their workflows, and a regulated yield platform demonstrating compliance-first DeFi.
+
+**Multi-chain support**: Complr works with any blockchain. Wallet screening and transaction compliance checks support Ethereum/EVM, Solana, Bitcoin, and other address formats out of the box. The `chain` parameter is optional -- address formats are auto-detected when omitted.
 
 ## Product Phases
 
@@ -42,7 +44,7 @@ The SDK wraps the compliance engine into an authenticated API that exchanges and
 
 - **Authenticated API** -- Bearer token auth with per-key rate limiting
 - **Batch Compliance Checks** -- Check up to 50 transactions in parallel
-- **Wallet Risk Screening** -- LLM-powered wallet address risk assessment
+- **Wallet Risk Screening** -- Multi-chain LLM-powered wallet address risk assessment with auto-detection
 - **Webhook Delivery** -- HMAC-signed webhook notifications with exponential backoff retry
 - **Usage Tracking** -- Per-key request counts and usage statistics
 - **TypeScript-first** -- Full type definitions, zero dependencies
@@ -71,8 +73,11 @@ const result = await complr.checkTransaction({
 // Batch check
 const batch = await complr.checkBatch(transactions);
 
-// Wallet screening
-const screen = await complr.screenWallet("0xabc...", "ethereum", "MAS");
+// Wallet screening (chain auto-detected from address format)
+const screen = await complr.screenWallet("0xabc...");
+
+// Or specify chain explicitly
+const screenExplicit = await complr.screenWallet("0xabc...", "ethereum", "MAS");
 
 // Webhook management
 await complr.registerWebhook("https://your-app.com/webhooks", ["check.blocked", "screen.high_risk"], "your-secret");
@@ -200,14 +205,16 @@ Four cross-cutting improvements that deepen the platform without adding any npm 
 
 The knowledge base now builds a TF-IDF index on every document added. Regulatory queries and compliance checks use cosine-similarity semantic search to find the most relevant documents instead of returning all docs for a jurisdiction. Falls back to jurisdiction-wide search when no results match.
 
-### Pluggable Wallet Screening (OFAC SDN)
+### Pluggable Wallet Screening (OFAC SDN, Multi-Chain)
 
-Wallet screening is now a two-stage pipeline:
+Wallet screening is now a two-stage pipeline supporting addresses from any blockchain:
 
 1. **Provider check** -- all registered `ScreeningProvider`s are queried first. An exact match (e.g. OFAC SDN) returns immediately with `riskScore: 100`, `riskLevel: "critical"`.
-2. **LLM analysis** -- if no exact sanctions hit, the LLM screening runs as before, augmented with any provider context.
+2. **LLM analysis** -- if no exact sanctions hit, the LLM screening runs as before, augmented with provider context.
 
-The built-in `OfacScreener` fetches the US Treasury's SDN address supplement (`add.csv`) and entity list (`sdn.csv`), parses all "Digital Currency Address" entries, and matches by exact normalized address. Data refreshes automatically every 24 hours.
+The `chain` parameter is optional -- address formats (Ethereum/EVM, Solana, Bitcoin) are auto-detected when omitted.
+
+The built-in `OfacScreener` fetches the US Treasury's SDN address supplement (`add.csv`) and entity list (`sdn.csv`), parses all "Digital Currency Address" entries across all chains, and matches by exact normalized address. Data refreshes automatically every 24 hours.
 
 Custom providers can be added by implementing the `ScreeningProvider` interface and registering with the `ScreeningRegistry`.
 

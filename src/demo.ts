@@ -31,8 +31,8 @@ function divider(title: string) {
 }
 
 async function main() {
-  console.log("Complr - AI-Native Compliance Intelligence for Asia");
-  console.log("====================================================");
+  console.log("Complr - AI-Powered Compliance Infrastructure for Digital Assets");
+  console.log("================================================================");
   console.log(`Loaded ${complr.documentCount} regulatory documents\n`);
 
   // ──────────────────────────────────────────────────────────
@@ -62,11 +62,11 @@ async function main() {
   const sampleTx: TransactionDetails = {
     transactionId: "tx_demo_001",
     timestamp: "2026-03-04T10:30:00Z",
-    senderWallet: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-    recipientWallet: "3Kz9bMiVYFhBEbJSiRvNaDEM8TM2qMYyHQfJwcQpzLr2",
+    senderWallet: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    recipientWallet: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     amount: "25000",
     currency: "USDC",
-    chain: "solana",
+    chain: "ethereum",
     senderKycLevel: "standard",
     recipientKycLevel: "basic",
   };
@@ -112,11 +112,11 @@ async function main() {
   const suspiciousTx: TransactionDetails = {
     transactionId: "tx_suspicious_002",
     timestamp: "2026-03-04T03:15:00Z",
-    senderWallet: "9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT",
-    recipientWallet: "HN7cABqLq46Es1jh92dQQisAi5YqBXMWUZbzPLGUoJqo",
+    senderWallet: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+    recipientWallet: "0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98",
     amount: "98500",
     currency: "USDC",
-    chain: "solana",
+    chain: "ethereum",
     senderKycLevel: "basic",
     recipientKycLevel: "unknown",
   };

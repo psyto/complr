@@ -1,6 +1,33 @@
 /** Supported jurisdictions for compliance analysis */
 export type Jurisdiction = "MAS" | "SFC" | "FSA";
 
+/** Detected address format / chain family */
+export type AddressFormat = "ethereum" | "solana" | "bitcoin" | "unknown";
+
+/**
+ * Auto-detect the blockchain address format from the address string.
+ *
+ * Supports:
+ *  - Ethereum/EVM: 0x-prefixed hex, 42 chars (e.g. 0xdAC17F958D2ee523a2206206994597C13D831ec7)
+ *  - Solana: base58, 32-44 chars (e.g. 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU)
+ *  - Bitcoin: starts with 1, 3, or bc1 (e.g. bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4)
+ */
+export function detectAddressFormat(address: string): AddressFormat {
+  if (!address) return "unknown";
+
+  // Ethereum / EVM: 0x + 40 hex chars = 42 total
+  if (/^0x[0-9a-fA-F]{40}$/.test(address)) return "ethereum";
+
+  // Bitcoin: legacy (1...), P2SH (3...), or bech32 (bc1...)
+  if (/^(1|3)[a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return "bitcoin";
+  if (/^bc1[a-zA-HJ-NP-Z0-9]{25,62}$/i.test(address)) return "bitcoin";
+
+  // Solana: base58, typically 32-44 chars, no 0/O/I/l
+  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) return "solana";
+
+  return "unknown";
+}
+
 /** Regulatory document metadata */
 export interface RegulatoryDocument {
   id: string;
@@ -205,7 +232,7 @@ export interface BatchCheckResponse {
 /** Wallet screening request */
 export interface WalletScreenRequest {
   address: string;
-  chain: string;
+  chain?: string;
   jurisdiction?: Jurisdiction;
 }
 

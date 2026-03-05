@@ -1,7 +1,7 @@
 {
   "name": "complr",
   "version": "0.1.0",
-  "description": "AI-Native Compliance Intelligence for Asia's Crypto Markets",
+  "description": "AI-powered compliance infrastructure for the digital asset industry",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

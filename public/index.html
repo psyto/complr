@@ -249,11 +249,11 @@
   <div class="row">
     <div class="form-group">
       <label>Sender Wallet</label>
-      <input id="c-sender" value="7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU">
+      <input id="c-sender" value="0xdAC17F958D2ee523a2206206994597C13D831ec7">
     </div>
     <div class="form-group">
       <label>Recipient Wallet</label>
-      <input id="c-recipient" value="3Kz9bMiVYFhBEbJSiRvNaDEM8TM2qMYyHQfJwcQpzLr2">
+      <input id="c-recipient" value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">
     </div>
   </div>
   <div class="row-3">
@@ -267,7 +267,7 @@
     </div>
     <div class="form-group">
       <label>Chain</label>
-      <input id="c-chain" value="solana">
+      <input id="c-chain" value="ethereum">
     </div>
   </div>
   <div class="row">
@@ -309,11 +309,11 @@
   <div class="row">
     <div class="form-group">
       <label>Sender Wallet</label>
-      <input id="r-sender" value="9wFFyRfZBsuAha4YcuxcXLKwMxJR43S7fPfQLusDBzvT">
+      <input id="r-sender" value="0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed">
     </div>
     <div class="form-group">
       <label>Recipient Wallet</label>
-      <input id="r-recipient" value="HN7cABqLq46Es1jh92dQQisAi5YqBXMWUZbzPLGUoJqo">
+      <input id="r-recipient" value="0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98">
     </div>
   </div>
   <div class="row-3">
@@ -466,7 +466,7 @@ Recipient wallet previously associated with mixer service</textarea>
       recipientWallet: document.getElementById('r-recipient').value,
       amount: document.getElementById('r-amount').value,
       currency: document.getElementById('r-currency').value,
-      chain: 'solana',
+      chain: document.getElementById('c-chain')?.value || 'ethereum',
       senderKycLevel: document.getElementById('r-sender-kyc').value,
       recipientKycLevel: document.getElementById('r-recipient-kyc').value,
     };
