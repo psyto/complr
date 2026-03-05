@@ -7,7 +7,7 @@ const start = async () => {
     initializeDatabase();
 
     app.listen(config.port, () => {
-      console.log(`Fabrknt Compliance QN Add-On running at http://localhost:${config.port}`);
+      console.log(`Fabrknt Off-Chain Compliance QN Add-On running at http://localhost:${config.port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

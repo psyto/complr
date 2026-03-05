@@ -1,6 +1,6 @@
 {
-  "name": "Fabrknt Compliance",
-  "slug": "fabrknt-compliance",
+  "name": "Fabrknt Off-Chain Compliance",
+  "slug": "fabrknt-offchain-compliance",
   "version": "1.0.0",
   "description": "AI-powered cryptocurrency compliance, regulatory screening, and SAR/STR reporting for multi-chain dApps.",
   "author": "Fabrknt",
