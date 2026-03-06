@@ -427,6 +427,29 @@ npm test            # Run all tests (~66 tests, 9 suites)
 
 CI runs automatically on push/PR to `master` via GitHub Actions (Node 20, build + test).
 
+## QuickNode Marketplace Add-on
+
+**Fabrknt Off-Chain Compliance** (`fabrknt-offchain-compliance`) is a QuickNode Marketplace add-on that exposes Complr's compliance engine as a managed service. Source lives in `qn-addon/`.
+
+### Endpoints
+
+| Method | Path | Plans | Description |
+|--------|------|-------|-------------|
+| POST | `/v1/check` | Starter, Pro | Single transaction compliance check |
+| POST | `/v1/check/batch` | Pro | Batch compliance check (up to 50) |
+| POST | `/v1/query` | Starter, Pro | Regulatory query |
+| POST | `/v1/report` | Pro | SAR/STR report generation |
+| POST | `/v1/screen/wallet` | Pro | Wallet risk screening |
+| POST | `/v1/screen/address` | Starter, Pro | Address sanctions screening |
+| POST | `/v1/screen/batch` | Pro | Batch address screening (up to 100) |
+
+### Plans
+
+| Plan | Price | Rate Limit |
+|------|-------|------------|
+| **Starter** | Free | 50 req/min |
+| **Pro** | $99/month | 200 req/min |
+
 ## License
 
 Proprietary. All rights reserved.
