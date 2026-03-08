@@ -1,0 +1,7 @@
+packages:
+  - "packages/*"
+allowBuilds:
+  '@ffmpeg-installer/darwin-arm64': false
+  better-sqlite3: false
+  esbuild: false
+  puppeteer: false
