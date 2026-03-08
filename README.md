@@ -122,7 +122,7 @@ Admin API routes are protected by the `ADMIN_TOKEN` environment variable:
 
 ```bash
 # Start with admin auth enabled
-ADMIN_TOKEN=your-secret-token ANTHROPIC_API_KEY=sk-ant-... npm run start:server
+ADMIN_TOKEN=your-secret-token ANTHROPIC_API_KEY=sk-ant-... pnpm start:server
 ```
 
 - **If `ADMIN_TOKEN` is set:** all admin API routes require `Authorization: Bearer <token>` header
@@ -244,7 +244,7 @@ In addition to the built-in OFAC provider, you can load a custom sanctions list 
 echo '[{"address":"0xbad","entity":"Bad Actor","program":"CUSTOM","listEntry":"#1"}]' > sanctions.json
 
 # Start with custom screener
-CUSTOM_SANCTIONS_FILE=./sanctions.json ANTHROPIC_API_KEY=sk-ant-... npm run start:server
+CUSTOM_SANCTIONS_FILE=./sanctions.json ANTHROPIC_API_KEY=sk-ant-... pnpm start:server
 ```
 
 The custom screener performs exact case-insensitive address matching with confidence 1.0.
@@ -274,7 +274,7 @@ curl -X POST localhost:3000/admin/api-keys \
 Set `COMPLR_DATA_DIR` to persist organizations and API keys across server restarts:
 
 ```bash
-COMPLR_DATA_DIR=/tmp/complr-data ANTHROPIC_API_KEY=sk-ant-... npm run start:server
+COMPLR_DATA_DIR=/tmp/complr-data ANTHROPIC_API_KEY=sk-ant-... pnpm start:server
 ```
 
 Data is stored as JSON files with atomic writes. Without `COMPLR_DATA_DIR`, everything stays in-memory (backward compatible).
@@ -293,7 +293,7 @@ Open `http://localhost:3000/admin` for a web-based admin UI with 4 tabs:
 ~66 tests across 9 test files using `node:test` + `tsx`:
 
 ```bash
-npm test
+pnpm test
 ```
 
 Tests cover: TF-IDF search, audit logging, organizations, API keys, OFAC screener, screening registry, knowledge base, admin auth middleware, and HTTP-level API integration tests.
@@ -303,17 +303,20 @@ Tests cover: TF-IDF search, audit logging, organizations, API keys, OFAC screene
 ## Quickstart
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies (requires pnpm@10.31.0)
+pnpm install
+
+# Build all packages (uses turbo)
+pnpm build
 
 # Start the server (serves all 3 phases)
-ANTHROPIC_API_KEY=sk-ant-... npm run start:server
+ANTHROPIC_API_KEY=sk-ant-... pnpm start:server
 
 # Run the Phase 0 demo
-ANTHROPIC_API_KEY=sk-ant-... npx tsx src/demo.ts
+ANTHROPIC_API_KEY=sk-ant-... pnpm tsx packages/core/src/demo.ts
 
 # Start the interactive CLI
-ANTHROPIC_API_KEY=sk-ant-... npm start
+ANTHROPIC_API_KEY=sk-ant-... pnpm start
 ```
 
 After starting the server:
@@ -325,69 +328,75 @@ After starting the server:
 
 ## Architecture
 
+This project is a **pnpm monorepo** managed with **turbo**. It uses pnpm@10.31.0 and contains three packages:
+
 ```
-src/
-  index.ts                          # Complr class -- main entry point
-  types.ts                          # Shared types and interfaces
-  utils.ts                          # JSON extraction from LLM responses
-  demo.ts                           # Demo script (4 features)
-  cli.ts                            # Interactive REPL
-  api/
-    app.ts                          # createApp() factory for testability
-    server.ts                       # Thin entry point (env, services, listen)
-    vault-routes.ts                 # Vault demo endpoints
-  audit/
-    logger.ts                       # Append-only audit logger with query/filter
-  auth/
-    api-keys.ts                     # API key generation, validation, usage tracking
-    middleware.ts                   # Bearer token auth + per-key/org rate limiting
-    organizations.ts                # Multi-tenant organization manager
-  data/
-    seed-regulations.ts             # 8 seed regulatory documents
-    seed-investors.ts               # 3 demo investors
-  policy/
-    engine.ts                       # Multi-jurisdiction compliance engine
-    wallet-screener.ts              # OFAC + LLM wallet risk screening
-    screening-provider.ts           # ScreeningRegistry for pluggable providers
-    ofac-screener.ts                # OFAC SDN list fetcher/parser
-    custom-screener.ts              # JSON-file custom sanctions screener
-  regulatory/
-    analyzer.ts                     # LLM-powered regulatory analysis
-    knowledge-base.ts               # Document store with TF-IDF semantic search
-    vector-search.ts                # TF-IDF index with cosine similarity
-  reports/
-    generator.ts                    # SAR/STR report generation
-  vault/
-    simulator.ts                    # Vault strategies, NAV, deposit/withdraw
-    investor-compliance.ts          # Investor registration and KYC screening
-    report-generator.ts             # Monthly investor reports and tax summaries
-  storage/
-    json-store.ts                   # Generic file-backed Map store
-  webhooks/
-    manager.ts                      # Webhook registration and HMAC-signed delivery
+packages/
+  core/                             # @complr/core -- compliance engine + API server
+    src/
+      index.ts                      # Complr class -- main entry point
+      types.ts                      # Shared types and interfaces
+      utils.ts                      # JSON extraction from LLM responses
+      demo.ts                       # Demo script (4 features)
+      cli.ts                        # Interactive REPL
+      api/
+        app.ts                      # createApp() factory for testability
+        server.ts                   # Thin entry point (env, services, listen)
+        vault-routes.ts             # Vault demo endpoints
+      audit/
+        logger.ts                   # Append-only audit logger with query/filter
+      auth/
+        api-keys.ts                 # API key generation, validation, usage tracking
+        middleware.ts               # Bearer token auth + per-key/org rate limiting
+        organizations.ts            # Multi-tenant organization manager
+      data/
+        seed-regulations.ts         # 8 seed regulatory documents
+        seed-investors.ts           # 3 demo investors
+      policy/
+        engine.ts                   # Multi-jurisdiction compliance engine
+        wallet-screener.ts          # OFAC + LLM wallet risk screening
+        screening-provider.ts       # ScreeningRegistry for pluggable providers
+        ofac-screener.ts            # OFAC SDN list fetcher/parser
+        custom-screener.ts          # JSON-file custom sanctions screener
+      regulatory/
+        analyzer.ts                 # LLM-powered regulatory analysis
+        knowledge-base.ts           # Document store with TF-IDF semantic search
+        vector-search.ts            # TF-IDF index with cosine similarity
+      reports/
+        generator.ts                # SAR/STR report generation
+      vault/
+        simulator.ts                # Vault strategies, NAV, deposit/withdraw
+        investor-compliance.ts      # Investor registration and KYC screening
+        report-generator.ts         # Monthly investor reports and tax summaries
+      storage/
+        json-store.ts               # Generic file-backed Map store
+      webhooks/
+        manager.ts                  # Webhook registration and HMAC-signed delivery
+    tests/                          # Tests (node:test + tsx)
+      vector-search.test.ts         # TF-IDF index tests
+      audit-logger.test.ts          # Audit logger tests
+      organizations.test.ts         # Organization manager tests
+      api-keys.test.ts              # API key manager tests
+      ofac-screener.test.ts         # OFAC screener tests
+      screening-registry.test.ts    # Screening registry tests
+      knowledge-base.test.ts        # Knowledge base tests
+      admin-auth.test.ts            # Admin auth middleware tests
+      api-integration.test.ts       # HTTP-level integration tests
+    public/
+      index.html                    # Phase 0 web UI (4 tabs)
+      vault.html                    # Phase 2 vault dashboard (5 tabs)
+      admin.html                    # Admin dashboard (4 tabs)
 
-tests/                              # Tests (node:test + tsx)
-  vector-search.test.ts             # TF-IDF index tests
-  audit-logger.test.ts              # Audit logger tests
-  organizations.test.ts             # Organization manager tests
-  api-keys.test.ts                  # API key manager tests
-  ofac-screener.test.ts             # OFAC screener tests
-  screening-registry.test.ts        # Screening registry tests
-  knowledge-base.test.ts            # Knowledge base tests
-  admin-auth.test.ts                # Admin auth middleware tests
-  api-integration.test.ts           # HTTP-level integration tests
+  sdk/                              # @complr/sdk -- standalone SDK package
+    src/
+      client.ts                     # ComplrClient class with retry/backoff
+      types.ts                      # SDK-facing type definitions
+      webhook-handler.ts            # Signature verification + Express middleware
+      index.ts                      # SDK entry point
 
-sdk/                                # Standalone SDK package (@complr/sdk)
-  src/
-    client.ts                       # ComplrClient class with retry/backoff
-    types.ts                        # SDK-facing type definitions
-    webhook-handler.ts              # Signature verification + Express middleware
-    index.ts                        # SDK entry point
-
-public/
-  index.html                        # Phase 0 web UI (4 tabs)
-  vault.html                        # Phase 2 vault dashboard (5 tabs)
-  admin.html                        # Admin dashboard (4 tabs)
+  qn-addon/                         # @complr/qn-addon -- QuickNode Marketplace add-on
+    docs/
+      user-guide.md                 # End-user documentation for the add-on
 ```
 
 ## Jurisdictions
@@ -410,7 +419,7 @@ The knowledge base ships with 8 regulatory documents covering:
 
 - **Zero new npm dependencies** -- uses native `fetch()`, `node:crypto`, inline SVG charts, hand-rolled TF-IDF and CSV parser
 - **Optional file persistence** -- `COMPLR_DATA_DIR` enables JSON-file persistence for API keys and organizations via `JsonStore<T>`. Without it, everything stays in-memory (backward compat)
-- **SDK is standalone** -- `sdk/` directory with its own `package.json`, duplicates types intentionally for clean package separation
+- **SDK is standalone** -- `packages/sdk/` with its own `package.json`, duplicates types intentionally for clean package separation
 - **Legacy routes preserved** -- existing web UI at `/` continues to work without auth
 - **Single Express server** -- SDK API (`/api/v1/*`), vault demo (`/vault/*`), and web UI all share one server
 - **Audit everything** -- every API route is wrapped with `auditWrap` for automatic logging with zero per-handler boilerplate
@@ -419,17 +428,18 @@ The knowledge base ships with 8 regulatory documents covering:
 ## Development
 
 ```bash
-npm run build       # Compile TypeScript
-npm run dev         # Watch mode
-npm run typecheck   # Type check without emitting
-npm test            # Run all tests (~66 tests, 9 suites)
+pnpm install        # Install all dependencies
+pnpm build          # Build all packages (via turbo)
+pnpm dev            # Watch mode
+pnpm typecheck      # Type check without emitting
+pnpm test           # Run all tests (~66 tests, 9 suites)
 ```
 
-CI runs automatically on push/PR to `master` via GitHub Actions (Node 20, build + test).
+CI runs automatically on push/PR to `master` via GitHub Actions (Node 20, pnpm, build + test).
 
 ## QuickNode Marketplace Add-on
 
-**Fabrknt Off-Chain Compliance** (`fabrknt-offchain-compliance`) is a QuickNode Marketplace add-on that exposes Complr's compliance engine as a managed service. Source lives in `qn-addon/`.
+**Fabrknt Off-Chain Compliance** (`fabrknt-offchain-compliance`) is a QuickNode Marketplace add-on that exposes Complr's compliance engine as a managed service. Source lives in `packages/qn-addon/`.
 
 ### Endpoints
 
