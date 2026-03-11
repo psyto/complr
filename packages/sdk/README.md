@@ -89,6 +89,23 @@ const { answer } = await complr.query(
 );
 ```
 
+### Regulatory Query with Confidence Scoring
+
+Get structured confidence metadata, verified citations, and hallucination warnings:
+
+```typescript
+const result = await complr.queryConfident(
+  "What are the Travel Rule requirements for transfers above S$1,500?",
+  "MAS"
+);
+
+console.log(result.confidence.score);  // 0.0 - 1.0
+console.log(result.confidence.level);  // "high" | "medium" | "low" | "very_low"
+console.log(result.citations);         // verified source citations
+console.log(result.warnings);          // hallucination/quality warnings
+console.log(result.disclaimer);        // legal disclaimer (always present)
+```
+
 ## Webhooks
 
 ### Register a Webhook
@@ -167,6 +184,34 @@ const filtered = await complr.getAuditLogs({
 
 Every API call is logged with: action, resource, result, status code, client IP, and duration.
 
+## Review Queue (Admin)
+
+Compliance officers can manage the human-in-the-loop review queue. These methods require an admin token as the API key.
+
+```typescript
+import { ComplrClient } from "@complr/sdk";
+
+const admin = new ComplrClient({
+  apiKey: "your-admin-token",
+  baseUrl: "http://localhost:3000",
+});
+
+// List pending reviews
+const reviews = await admin.getReviews({ status: "pending", priority: "critical" });
+
+// Get queue statistics
+const stats = await admin.getReviewStats();
+console.log(stats.pending, stats.approved, stats.rejected, stats.escalated);
+
+// Get a specific review item
+const item = await admin.getReview("rv_abc123");
+
+// Approve, reject, or escalate
+await admin.approveReview("rv_abc123", "officer-1", "Verified against source docs");
+await admin.rejectReview("rv_def456", "officer-1", "False positive");
+await admin.escalateReview("rv_ghi789", "officer-2", "Needs legal team input");
+```
+
 ## Configuration
 
 ```typescript
@@ -186,6 +231,8 @@ const complr = new ComplrClient({
 - **Full TypeScript types** -- all request/response types exported
 - **OFAC sanctions screening** -- sanctioned addresses blocked instantly before LLM analysis
 - **Audit trail** -- every API call logged server-side for compliance
+- **Confidence scoring** -- structured confidence metadata for regulatory queries with citation verification
+- **Review queue management** -- approve, reject, or escalate AI decisions via the admin API
 
 ## Webhook Events
 
