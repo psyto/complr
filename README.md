@@ -303,13 +303,13 @@ Open `http://localhost:3000/admin` for a web-based admin UI with 5 tabs:
 
 ### Automated Tests
 
-235 tests across 20 test files using vitest:
+289 tests across 23 test files using vitest:
 
 ```bash
 pnpm test
 ```
 
-Tests cover: TF-IDF search, audit logging, organizations, API keys, OFAC screener, screening registry, knowledge base, admin auth middleware, HTTP-level API integration, review queue (unit + API routes), confidence scoring, external screening providers, TRM Labs provider, Chainalysis provider, rate limiting, and environment validation.
+Tests cover: TF-IDF search, audit logging, organizations, API keys, OFAC screener, screening registry, knowledge base, admin auth middleware, HTTP-level API integration, review queue (unit + API routes), confidence scoring, external screening providers, TRM Labs provider, Chainalysis provider, rate limiting, environment validation, E2E smoke test, SDK client (request formatting, retry logic, review queue methods), and SDK webhook handler (HMAC signature verification).
 
 ---
 
@@ -577,6 +577,7 @@ packages/
       chainalysis-provider.test.ts  # Chainalysis provider tests (mocked)
       rate-limit.test.ts            # Rate limiter middleware tests
       env-validation.test.ts        # Env validation tests
+      e2e-smoke.test.ts             # Full workflow E2E smoke test
     public/
       index.html                    # Phase 0 web UI (4 tabs)
       vault.html                    # Phase 2 vault dashboard (5 tabs)
@@ -588,6 +589,9 @@ packages/
       types.ts                      # SDK-facing type definitions
       webhook-handler.ts            # Signature verification + Express middleware
       index.ts                      # SDK entry point
+    tests/
+      client.test.ts                # SDK client unit tests (mocked fetch)
+      webhook-handler.test.ts       # Webhook HMAC verification tests
 
   qn-addon/                         # @complr/qn-addon -- QuickNode Marketplace add-on
     docs/
@@ -632,7 +636,7 @@ pnpm install        # Install all dependencies
 pnpm build          # Build all packages (via turbo)
 pnpm dev            # Watch mode
 pnpm typecheck      # Type check without emitting
-pnpm test           # Run all tests (235 tests, 20 suites)
+pnpm test           # Run all tests (289 tests, 23 suites)
 ```
 
 CI runs automatically on push/PR to `master` via GitHub Actions (Node 20, pnpm, build + test).

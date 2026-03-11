@@ -234,6 +234,16 @@ const complr = new ComplrClient({
 - **Confidence scoring** -- structured confidence metadata for regulatory queries with citation verification
 - **Review queue management** -- approve, reject, or escalate AI decisions via the admin API
 
+## Tests
+
+36 tests covering the SDK client and webhook handler:
+
+```bash
+pnpm --filter @complr/sdk test
+```
+
+Tests cover: request formatting for all endpoints, response handling, retry logic with exponential backoff, 429 rate limit handling, review queue methods, audit log query building, webhook HMAC signature verification, and Express webhook middleware.
+
 ## Webhook Events
 
 | Event | Trigger |
