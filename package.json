@@ -4,6 +4,7 @@
   "description": "AI-powered compliance infrastructure for the digital asset industry",
   "private": true,
   "scripts": {
+    "prepare": "pnpm run build",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint"

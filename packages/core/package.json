@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
     "start:server": "node dist/api/server.js",
