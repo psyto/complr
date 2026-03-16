@@ -1,6 +1,6 @@
 {
   "name": "@fabrknt/complr-core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AI-powered compliance engine for digital assets — regulatory intelligence, screening, and reporting",
   "type": "module",
   "main": "dist/index.js",
@@ -41,5 +41,6 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
-  }
+  },
+  "license": "MIT"
 }
